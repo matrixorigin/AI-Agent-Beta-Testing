@@ -24,7 +24,8 @@ AI Job 只读，不接触发布 Token。发布 Job 不调用模型，也不执�
 
 - GitHub 组织需要允许 GitHub Copilot CLI / Agentic Workflows。
 - 执行用户或组织需要可用的 Copilot 计划和 AI credits。
-- 默认配置使用 `permissions.copilot-requests: write` 和组织集中 Copilot 计费，不保存个人 Copilot Token。若组织没有启用该能力，需要按 `gh-aw` 官方文档改用 `COPILOT_GITHUB_TOKEN`，并重新编译和审查 workflow。
+- 当前组织未启用 Copilot CLI 集中计费，使用个人账户拥有的 fine-grained PAT：Resource owner 必须是个人账户，Account permissions 只设置 `Copilot Requests: Read`，并保存为 Repository Secret `COPILOT_GITHUB_TOKEN`。
+- `COPILOT_GITHUB_TOKEN` 只负责模型推理，与跨仓发布使用的 `MATRIXFLOW_AUTOMATION_TOKEN` 分离；Token 所属个人账户必须有有效 Copilot 许可。
 - GitHub Agentic Workflows 当前为 Public Preview；升级 `gh-aw` 后必须重新编译 `.lock.yml` 并审查生成差异。
 
 ### Fine-grained PAT
@@ -41,10 +42,11 @@ AI Job 只读，不接触发布 Token。发布 Job 不调用模型，也不执�
 
 若不授予 Projects 权限，Storybook Issue 仍会创建，但源 Case 会被标记为 `publish/blocked` 并明确列出未加入 Project 的原因。
 
-在源仓库添加一个 Repository Secret：
+在源仓库添加两个职责分离的 Repository Secrets：
 
 ```text
 MATRIXFLOW_AUTOMATION_TOKEN
+COPILOT_GITHUB_TOKEN
 ```
 
 发布 Issue 的作者会显示为 Token 所属用户 `WingWR`。不要把 Token 写入仓库文件、Issue、评论或日志；仅保存为 GitHub Actions Secret。
@@ -69,7 +71,7 @@ npm test
 合并到 `main` 后：
 
 1. 在仓库 Settings 中启用 Actions，并允许使用所需的已固定 SHA Actions。
-2. 添加 `MATRIXFLOW_AUTOMATION_TOKEN` Secret。
+2. 添加 `MATRIXFLOW_AUTOMATION_TOKEN` 和 `COPILOT_GITHUB_TOKEN` Secrets。
 3. 手动运行 `Bootstrap automation labels`。
 4. 创建一个无敏感信息的测试 Case。
 5. 确认 Case Router 只生成草稿评论和路由 Label。
