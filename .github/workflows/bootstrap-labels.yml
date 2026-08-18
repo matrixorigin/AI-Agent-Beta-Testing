@@ -1,0 +1,51 @@
+name: Bootstrap automation labels
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  labels:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Create or update labels
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const labels = [
+              ['automation/processed', '0969da', 'Case automation has produced a result'],
+              ['route/storybook-draft', '8250df', 'Storybook draft is ready for review'],
+              ['route/bug-draft', 'd73a4a', 'Bug draft is ready for review'],
+              ['route/both-draft', 'bf8700', 'Storybook and bug drafts are ready'],
+              ['route/needs-info', 'fbca04', 'Automation needs additional information'],
+              ['route/duplicate', 'cfd3d7', 'Existing target issue may already cover this case'],
+              ['route/untrusted', 'b60205', 'Issue author requires maintainer trust review'],
+              ['publish/approved', '0e8a16', 'Maintainer approved the exact generated draft for publishing'],
+              ['publish/synced', '1d76db', 'Approved draft was published to matrixflow'],
+              ['publish/blocked', 'd93f0b', 'Publishing was blocked and needs maintainer action'],
+            ];
+
+            for (const [name, color, description] of labels) {
+              try {
+                await github.rest.issues.updateLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name,
+                  color,
+                  description,
+                });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name,
+                  color,
+                  description,
+                });
+              }
+            }

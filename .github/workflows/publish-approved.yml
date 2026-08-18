@@ -1,0 +1,49 @@
+name: Publish approved MatrixFlow draft
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: read
+  issues: read
+
+concurrency:
+  group: publish-case-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: >-
+      github.event.issue.pull_request == null &&
+      github.event.label.name == 'publish/approved'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out automation repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+
+      - name: Create short-lived GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
+        with:
+          app-id: ${{ secrets.MATRIXFLOW_AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.MATRIXFLOW_AUTOMATION_APP_PRIVATE_KEY }}
+          owner: matrixorigin
+          repositories: |
+            AI-Agent-Beta-Testing
+            matrixflow
+
+      - name: Publish approved draft
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          TARGET_REPOSITORY: matrixorigin/matrixflow
+          STORYBOOK_PROJECT: New MatrixOne Intelligence
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          retries: 2
+          script: |
+            const publish = require('./.github/scripts/publish-draft.cjs');
+            await publish({ github, context, core });

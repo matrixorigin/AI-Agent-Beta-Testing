@@ -1,0 +1,7 @@
+interface:
+  display_name: "MatrixFlow BUG 提报"
+  short_description: "整理并提交 MatrixFlow BUG issue"
+  default_prompt: "Use $matrixflow-bug-report to draft a MatrixFlow BUG issue for matrixorigin/matrixflow."
+
+policy:
+  allow_implicit_invocation: true

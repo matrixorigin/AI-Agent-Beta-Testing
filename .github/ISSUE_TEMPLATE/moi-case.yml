@@ -1,0 +1,146 @@
+name: MOI 探索验证 Case
+description: 记录一次真实、完整、已执行的 MOI 使用任务
+title: "【姓名】【01/10】【用一句话概括任务和结果】"
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        本仓库是公开仓库。不得提交未经授权的客户材料、个人信息、账号、内部链接、Token、密钥或其他敏感数据。
+        本表单中的需求来源固定为“探索验证”。
+
+  - type: input
+    id: explorer
+    attributes:
+      label: 测试人
+      description: 填写真实姓名，用于内测统计。
+    validations:
+      required: true
+
+  - type: input
+    id: owner
+    attributes:
+      label: 探索发起人或 owner
+      description: 谁提出或负责这次探索；未知时填写“待确认”。
+    validations:
+      required: true
+
+  - type: input
+    id: tested_at
+    attributes:
+      label: 测试时间与环境
+      description: 日期、MOI 环境、浏览器或客户端；未知项明确写 N/A。
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: 01 你原本想完成什么工作
+      description: 说明真实业务角色、目标、为什么需要完成以及结果将用于哪里。
+    validations:
+      required: true
+
+  - type: textarea
+    id: agent_tools
+    attributes:
+      label: 02 使用了哪个智能体、模型、技能或工具
+      description: 没有使用的项目填写“无”，未知填写 N/A。
+    validations:
+      required: true
+
+  - type: textarea
+    id: process
+    attributes:
+      label: 03 实际输入和操作过程
+      description: 包含实际提示词、输入材料、关键步骤及多轮操作。
+    validations:
+      required: true
+
+  - type: dropdown
+    id: completion
+    attributes:
+      label: 完成情况
+      options:
+        - 完全完成
+        - 部分完成
+        - 未完成
+    validations:
+      required: true
+
+  - type: dropdown
+    id: usability
+    attributes:
+      label: 结果可用性
+      options:
+        - 可直接使用
+        - 修改后可用
+        - 不可用
+    validations:
+      required: true
+
+  - type: textarea
+    id: result
+    attributes:
+      label: 04 预期结果、实际结果和核验方式
+      description: 分开写预期、实际观察、如何核对，以及已证明和尚未证明的内容。
+    validations:
+      required: true
+
+  - type: textarea
+    id: blocker
+    attributes:
+      label: 05 卡点或错误
+      description: 写明位置、错误原文、是否有绕过方式及业务影响；没有填写“无”。
+    validations:
+      required: true
+
+  - type: textarea
+    id: improvement
+    attributes:
+      label: 06 可以进一步优化的地方
+      description: 没有建议填写“无”。
+    validations:
+      required: true
+
+  - type: dropdown
+    id: sample_status
+    attributes:
+      label: 样例状态
+      options:
+        - 已提供获准使用的原始或脱敏样例
+        - 暂无样例
+        - 不需要样例
+    validations:
+      required: true
+
+  - type: dropdown
+    id: synthetic_authorization
+    attributes:
+      label: 是否授权测试后续构造合成样例
+      options:
+        - 是
+        - 否
+        - 不适用
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 07 相关证据和样例说明
+      description: 提供获准公开的对话、文件、结果、截图、录屏、Trace ID 或错误记录；说明样例代表什么业务。
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: 提交确认
+      options:
+        - label: 我确认这是实际执行的探索验证 Case，不是理论描述。
+          required: true
+        - label: 我确认公开内容已获准使用并完成必要脱敏，未包含凭据或未授权材料。
+          required: true
+        - label: 我理解自动化会先生成草稿，只有维护者批准后才会发布到 matrixflow。
+          required: true
