@@ -5,9 +5,9 @@
 源仓库的 Case 全部属于 `探索验证`。自动化执行两个阶段：
 
 1. `Case Router` 使用 Copilot 和仓库级 Skill 生成 Storybook、Bug 或双产物草稿，并把草稿评论到源 Issue。
-2. 维护者检查草稿，添加 `publish/approved`。确定性发布 Job 使用短期 GitHub App Token 创建或更新 `matrixorigin/matrixflow` Issue。
+2. 维护者检查草稿，添加 `publish/approved`。确定性发布 Job 使用受限的 fine-grained PAT 创建或更新 `matrixorigin/matrixflow` Issue。
 
-AI Job 只读，不接触 GitHub App 私钥。发布 Job 不调用模型，也不执行 Issue 正文中的命令。
+AI Job 只读，不接触发布 Token。发布 Job 不调用模型，也不执行 Issue 正文中的命令。
 
 ## 2. 外部前置条件
 
@@ -27,31 +27,27 @@ AI Job 只读，不接触 GitHub App 私钥。发布 Job 不调用模型，也�
 - 默认配置使用 `permissions.copilot-requests: write` 和组织集中 Copilot 计费，不保存个人 Copilot Token。若组织没有启用该能力，需要按 `gh-aw` 官方文档改用 `COPILOT_GITHUB_TOKEN`，并重新编译和审查 workflow。
 - GitHub Agentic Workflows 当前为 Public Preview；升级 `gh-aw` 后必须重新编译 `.lock.yml` 并审查生成差异。
 
-### GitHub App
+### Fine-grained PAT
 
-创建一个仅供本流程使用的 GitHub App，安装到：
+创建一个仅供本流程使用的 fine-grained personal access token：
 
-- `matrixorigin/AI-Agent-Beta-Testing`
-- `matrixorigin/matrixflow`
+- Resource owner：`matrixorigin`
+- Repository access：只选择 `AI-Agent-Beta-Testing` 和 `matrixflow`
+- Repository permissions：`Metadata: Read-only`、`Issues: Read and write`
+- Organization permissions：`Projects: Read and write`
+- 建议设置 90 天有效期，并在到期前轮换
 
-最小权限：
+组织可能要求 Owner 审批 fine-grained PAT；审批完成前，Token 无法写入组织资源。
 
-| 范围 | 权限 | 用途 |
-|---|---|---|
-| Repository metadata | Read | 解析仓库与协作者权限 |
-| Issues | Read & write | 创建/更新目标 Issue、回填源 Issue、维护 Labels |
-| Organization Projects | Read & write | 将 Storybook 加入 `New MatrixOne Intelligence` |
+若不授予 Projects 权限，Storybook Issue 仍会创建，但源 Case 会被标记为 `publish/blocked` 并明确列出未加入 Project 的原因。
 
-若组织策略不允许 GitHub App 写 Project，Storybook Issue 仍会创建，但源 Case 会被标记为 `publish/blocked` 并明确列出未加入 Project 的原因。
-
-在源仓库添加 Secrets：
+在源仓库添加一个 Repository Secret：
 
 ```text
-MATRIXFLOW_AUTOMATION_APP_ID
-MATRIXFLOW_AUTOMATION_APP_PRIVATE_KEY
+MATRIXFLOW_AUTOMATION_TOKEN
 ```
 
-不要添加长期 GitHub PAT。发布 Issue 的作者会显示为 GitHub App Bot，而不是 `WingWR`。如必须由 `WingWR` 提交，只能停用云端发布 Job，改为本机审阅后执行 `matrixflow-bug-report/scripts/gh-wingwr.sh`。
+发布 Issue 的作者会显示为 Token 所属用户 `WingWR`。不要把 Token 写入仓库文件、Issue、评论或日志；仅保存为 GitHub Actions Secret。
 
 ## 3. 拉取与初始化
 
@@ -73,7 +69,7 @@ npm test
 合并到 `main` 后：
 
 1. 在仓库 Settings 中启用 Actions，并允许使用所需的已固定 SHA Actions。
-2. 添加 GitHub App Secrets。
+2. 添加 `MATRIXFLOW_AUTOMATION_TOKEN` Secret。
 3. 手动运行 `Bootstrap automation labels`。
 4. 创建一个无敏感信息的测试 Case。
 5. 确认 Case Router 只生成草稿评论和路由 Label。
@@ -125,6 +121,6 @@ npm test
 | 没有生成草稿 | 检查标题格式、作者 association、Copilot 策略和 AI credits |
 | 草稿格式无法发布 | 编辑源 Case 后重新运行 Router，不手工伪造 Bot 草稿 |
 | 发现重复 | 阅读目标正文，决定更新已有 Issue 或修改业务边界后重跑 |
-| App 无法写 matrixflow | 检查安装仓库范围及 Issues 权限 |
+| Token 无法写 matrixflow | 检查 Token 的组织审批、仓库选择及 Issues 权限 |
 | Storybook 未加入 Project | 检查 Organization Projects 权限和 Project 标题 |
 | 发布作者必须是 WingWR | 改走本机 Skill 提交流程；不要把个人 PAT 放进 Agent Job |
